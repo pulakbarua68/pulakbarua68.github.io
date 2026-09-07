@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>eFootball BAP - BKF ULTRA</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;touch-action:none}
+body{background:#000;height:100vh;overflow:hidden;font-family:Inter,sans-serif}
+#gameWrap{position:relative;width:100%;height:100vh;background:#0a1628;overflow:hidden}
+#fieldCanvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+.crowd{position:absolute;top:0;left:0;right:0;height:68px;background:repeating-linear-gradient(90deg,#1a2a4a 0px,#1a2a4a 22px,#0f1d33 22px,#0f1d33 44px);border-bottom:4px solid #1e3a8a}
+.ad-board{position:absolute;top:68px;left:0;right:0;height:18px;background:linear-gradient(90deg,#ff00ff,#00ffff,#ff00ff);display:flex;align-items:center;font-size:10px;font-weight:900;color:#fff;letter-spacing:1px;white-space:nowrap;overflow:hidden}
+.ad-board span{animation:marquee 12s linear infinite}
+@keyframes marquee{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+.top-ui{position:absolute;top:0;left:0;right:0;height:62px;display:flex;justify-content:flex-end;padding:8px 12px;z-index:10;pointer-events:none}
+.top-right{display:flex;gap:8px}
+.btn-top{width:44px;height:32px;background:rgba(255,255,255,0.9);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,0.4)}
+.btm-ui{position:absolute;bottom:0;left:0;right:0;height:150px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 12px 12px;z-index:10;pointer-events:none}
+.joystick{pointer-events:auto;width:115px;height:115px;background:rgba(255,255,255,0.12);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.25);border-radius:50%;position:relative}
+.stick{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:52px;height:52px;background:rgba(255,255,255,0.95);border-radius:50%;box-shadow:0 4px 15px rgba(0,0,0,0.5)}
+.actions{pointer-events:auto;display:grid;grid-template-columns:68px 68px;gap:12px}
+.ab{width:68px;height:68px;border-radius:50%;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#fff;flex-direction:column;box-shadow:0 5px 15px rgba(0,0,0,0.5)}
+.ab b{font-size:20px}
+.a1{background:linear-gradient(180deg,#a78bfa,#6d28d9)}.a2{background:linear-gradient(180deg,#38bdf8,#0284c7)}
+.a3{background:linear-gradient(180deg,#4ade80,#15803d)}.a4{background:linear-gradient(180deg,#fb923c,#c2410c)}
+.hud{position:absolute;top:96px;left:8px;background:rgba(0,0,0,0.7);padding:6px 10px;border-radius:8px;color:#facc15;font-size:11px;font-weight:800;display:flex;gap:10px;z-index:10;border:1px solid rgba(250,204,21,0.3)}
+#centerLogo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:36px;height:36px;background:#1e3a8a;border:2px solid #facc15;display:flex;align-items:center;justify-content:center;color:#facc15;font-weight:900;border-radius:4px;z-index:5}
+</style>
+</head>
+<body>
+<div id="gameWrap">
+<div class="crowd"></div>
+<div class="ad-board"><span>⚽ PLAY CRAZY @FOOTBALL ⚽ PLAY CRAZY @FOOTBALL ⚽ PLAY CRAZY @FOOTBALL ⚽ PLAY CRAZY @FOOTBALL ⚽</span></div>
+<canvas id="fieldCanvas"></canvas>
+<div id="centerLogo">e</div>
+<div class="top-ui"><div class="top-right"><div class="btn-top">⏮️</div><div class="btn-top">⏸️</div></div></div>
+<div class="hud"><span>💰 101499</span><span style="color:#22c55e">OVR 99</span><span style="color:#a78bfa">LVL 99</span><span>BAN 1-1 BRA</span></div>
+<div class="btm-ui">
+<div class="joystick" id="joy"><div class="stick" id="stick"></div></div>
+<div class="actions">
+<div class="ab a1">BICYCLE<b>🤸</b></div>
+<div class="ab a2">SPRINT<b>💨</b></div>
+<div class="ab a3">PASS<b>↗️</b></div>
+<div class="ab a4">SHOOT<b>⚽</b></div>
+</div>
+</div>
+</div>
+<script>
+const canvas=document.getElementById('fieldCanvas');
+const ctx=canvas.getContext('2d');
+let W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}resize();window.addEventListener('resize',resize);
+const players=[];
+for(let i=0;i<11;i++)players.push({team:'A',x:Math.random()*W*0.4+W*0.05,y:Math.random()*H*0.7+H*0.15+80});
+for(let i=0;i<11;i++)players.push({team:'B',x:Math.random()*W*0.4+W*0.5,y:Math.random()*H*0.7+H*0.15+80});
+let ball={x:W/2,y:H/2,vx:0,vy:0};
+let selected=0;
+function drawField(){
+ctx.fillStyle='#2d8a4e';ctx.fillRect(0,86,W,H-86-130);
+for(let i=0;i<W;i+=80){ctx.fillStyle=i%160==0?'#2f8f51':'#2a7d48';ctx.fillRect(i,86,80,H-86-130)}
+ctx.strokeStyle='rgba(255,255,255,0.85)';ctx.lineWidth=2;
+ctx.beginPath();ctx.moveTo(W/2,86);ctx.lineTo(W/2,H-130);ctx.stroke();
+ctx.beginPath();ctx.arc(W/2,(H+86-130)/2,90,0,Math.PI*2);ctx.stroke();
+ctx.strokeRect(W*0.05,86+H*0.05,W*0.9,H*0.65);
+ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(W/2,(H+86-130)/2,4,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(ball.x,ball.y+6,10,4,0,0,Math.PI*2);ctx.fill();
+}
+function draw(){
+drawField();
+players.forEach((p,i)=>{
+const isSel=i==selected;
+ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(p.x,p.y+8,10,4,0,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=p.team=='A'?'#facc15':'#991b1b';
+ctx.beginPath();ctx.arc(p.x,p.y,9,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=p.team=='A'?'#1e40af':'#fff';ctx.fillRect(p.x-5,p.y-7,10,7);
+if(isSel){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,14,0,Math.PI*2);ctx.stroke()}
+});
+ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,7,0,Math.PI*2);ctx.fill();
+ctx.fillStyle='#000';ctx.beginPath();ctx.arc(ball.x,ball.y,2.5,0,Math.PI*2);ctx.fill();
+requestAnimationFrame(draw);
+}
+draw();
+const joy=document.getElementById('joy'),stick=document.getElementById('stick');
+let dragging=false;
+joy.addEventListener('touchstart',e=>{dragging=true});
+joy.addEventListener('touchend',e=>{dragging=false;stick.style.transform='translate(-50%,-50%)';});
+joy.addEventListener('touchmove',e=>{
+if(!dragging)return;
+const r=joy.getBoundingClientRect();
+const cx=r.left+r.width/2,cy=r.top+r.height/2;
+let dx=e.touches[0].clientX-cx,dy=e.touches[0].clientY-cy;
+const dist=Math.min(35,Math.hypot(dx,dy));const ang=Math.atan2(dy,dx);
+dx=Math.cos(ang)*dist;dy=Math.sin(ang)*dist;
+stick.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;
+players[selected].x+=Math.cos(ang)*dist*0.12;
+players[selected].y+=Math.sin(ang)*dist*0.12;
+ball.x+=Math.cos(ang)*dist*0.03;ball.y+=Math.sin(ang)*dist*0.03;
+});
+canvas.addEventListener('click',e=>{
+let closest=0,d=9999;
+players.forEach((p,i)=>{if(p.team!='A')return;const dist=Math.hypot(p.x-e.clientX,p.y-e.clientY);if(dist<d){d=dist;closest=i}});
+if(d<50)selected=closest;
+});
+document.querySelector('.a4').addEventListener('touchstart',()=>{
+ball.vx=(Math.random()-0.5)*12;ball.vy=-8-Math.random()*8;
+let t=setInterval(()=>{ball.x+=ball.vx;ball.y+=ball.vy;ball.vy+=0.25;ball.vx*=0.99;if(ball.y>H-135){ball.vy*=-0.5;ball.y=H-135;if(Math.abs(ball.vy)<1)clearInterval(t)}},16);
+});
+</script>
+</body>
+</html>
