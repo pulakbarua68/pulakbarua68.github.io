@@ -110,3 +110,112 @@ let t=setInterval(()=>{ball.x+=ball.vx;ball.y+=ball.vy;ball.vy+=0.25;ball.vx*=0.
 </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>eFootball BAP - BKF ULTRA PRO</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;touch-action:none}
+body{background:#000;height:100vh;overflow:hidden;font-family:sans-serif}
+#gameWrap{position:relative;width:100%;height:100vh;background:#0a1628;overflow:hidden}
+#fieldCanvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+.crowd{position:absolute;top:0;left:0;right:0;height:62px;background:repeating-linear-gradient(90deg,#1a2a4a 0px,#1a2a4a 22px,#0f1d33 22px,#0f1d33 44px);border-bottom:4px solid #facc15;z-index:2}
+.ad-board{position:absolute;top:62px;left:0;right:0;height:20px;background:linear-gradient(90deg,#ff00ff,#00e5ff,#ff00ff);display:flex;align-items:center;font-size:11px;font-weight:900;color:#fff;letter-spacing:1px;white-space:nowrap;overflow:hidden;z-index:2}
+.ad-board span{animation:marquee 10s linear infinite}
+@keyframes marquee{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+.hud{position:absolute;top:90px;left:8px;right:8px;background:rgba(0,0,0,0.8);padding:7px 12px;border-radius:10px;color:#facc15;font-size:11px;font-weight:800;display:flex;justify-content:space-between;z-index:10;border:1px solid rgba(250,204,21,0.4);backdrop-filter:blur(6px)}
+.btm-ui{position:absolute;bottom:0;left:0;right:0;height:165px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 14px 14px;z-index:10;pointer-events:none;background:linear-gradient(0deg,rgba(0,0,0,0.95),transparent)}
+.joystick{pointer-events:auto;width:125px;height:125px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border:2px solid rgba(255,255,255,0.2);border-radius:50%;position:relative;box-shadow:0 0 20px rgba(0,0,0,0.5)}
+.stick{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:56px;height:56px;background:radial-gradient(circle at 30% 30%,#fff,#ccc);border-radius:50%;box-shadow:0 4px 15px rgba(0,0,0,0.6),inset 0 2px 4px rgba(255,255,255,0.8)}
+.actions{pointer-events:auto;display:grid;grid-template-columns:72px 72px;gap:12px}
+.ab{width:72px;height:72px;border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:10px;color:#fff;flex-direction:column;box-shadow:0 6px 18px rgba(0,0,0,0.6);transition:0.1s}
+.ab:active{transform:scale(0.9)}
+.ab b{font-size:22px;margin-top:2px}
+.a1{background:linear-gradient(180deg,#a78bfa,#6d28d9)}.a2{background:linear-gradient(180deg,#38bdf8,#0284c7)}
+.a3{background:linear-gradient(180deg,#4ade80,#15803d)}.a4{background:linear-gradient(180deg,#fb923c,#c2410c)}
+#goalPop{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%) scale(0);background:linear-gradient(180deg,#facc15,#eab308);color:#000;font-size:52px;font-weight:900;padding:12px 28px;border-radius:16px;z-index:100;transition:0.4s cubic-bezier(0.175,0.885,0.32,1.275);box-shadow:0 10px 40px rgba(250,204,21,0.6);pointer-events:none}
+#goalPop.show{transform:translate(-50%,-50%) scale(1)}
+.top-btns{position:absolute;top:8px;right:10px;display:flex;gap:8px;z-index:10}
+.tbtn{width:44px;height:34px;background:rgba(255,255,255,0.9);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 3px 10px rgba(0,0,0,0.4)}
+</style>
+</head>
+<body>
+<div id="gameWrap">
+<div class="crowd"></div>
+<div class="ad-board"><span>⚽ BKF ULTRA - PLAY CRAZY @FOOTBALL ⚽ eFOOTBALL 2025 ⚽ BKF ULTRA - PLAY CRAZY @FOOTBALL ⚽</span></div>
+<canvas id="fieldCanvas"></canvas>
+<div id="goalPop">GOOOAL!!! ⚽</div>
+<div class="top-btns"><div class="tbtn">⏮️</div><div class="tbtn">⏸️</div></div>
+<div class="hud"><span>💰 101499</span><span style="color:#22c55e">OVR 99</span><span style="color:#a78bfa">LVL 99</span><span id="score">BAN 1-1 BRA</span></div>
+<div class="btm-ui">
+<div class="joystick" id="joy"><div class="stick" id="stick"></div></div>
+<div class="actions">
+<div class="ab a1" id="b1">BICYCLE<b>🤸</b></div>
+<div class="ab a2" id="b2">SPRINT<b>💨</b></div>
+<div class="ab a3" id="b3">PASS<b>↗️</b></div>
+<div class="ab a4" id="b4">SHOOT<b>⚽</b></div>
+</div>
+</div>
+</div>
+<script>
+const canvas=document.getElementById('fieldCanvas');const ctx=canvas.getContext('2d');let W,H;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}resize();window.addEventListener('resize',resize);
+const players=[];const numsA=[1,2,4,5,3,6,8,10,7,11,9];const numsB=[1,2,4,5,3,6,8,10,7,11,9];
+for(let i=0;i<11;i++)players.push({team:'A',num:numsA[i],x:W*0.15+Math.random()*W*0.2,y:90+Math.random()*(H-260),vx:0,vy:0});
+for(let i=0;i<11;i++)players.push({team:'B',num:numsB[i],x:W*0.65+Math.random()*W*0.2,y:90+Math.random()*(H-260),vx:0,vy:0});
+let ball={x:W/2,y:H/2,vx:0,vy:0};let selected=0;let scoreA=1,scoreB=1;
+function drawField(){
+ctx.fillStyle='#2d8a4e';ctx.fillRect(0,82,W,H-82);
+for(let i=0;i<W;i+=70){ctx.fillStyle=i%140==0?'#309153':'#277a45';ctx.fillRect(i,82,70,H)}
+ctx.strokeStyle='rgba(255,255,255,0.9)';ctx.lineWidth=2.5;
+ctx.strokeRect(W*0.02,82+10,W*0.96,H-90-165);
+ctx.beginPath();ctx.moveTo(W/2,92);ctx.lineTo(W/2,H-165);ctx.stroke();
+ctx.beginPath();ctx.arc(W/2,(H-75)/2,85,0,Math.PI*2);ctx.stroke();
+ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(W/2,(H-75)/2,5,0,Math.PI*2);ctx.fill();
+ctx.strokeStyle='#fff';ctx.lineWidth=3;
+ctx.strokeRect(0,(H-75)/2-45,W*0.08,90);
+ctx.strokeRect(W-W*0.08,(H-75)/2-45,W*0.08,90);
+ctx.fillStyle='rgba(255,255,255,0.25)';ctx.fillRect(0,(H-75)/2-45,5,90);ctx.fillRect(W-5,(H-75)/2-45,5,90);
+ctx.fillStyle='rgba(0,0,0,0.25)';ctx.beginPath();ctx.ellipse(ball.x,ball.y+7,10,4,0,0,Math.PI*2);ctx.fill();
+}
+function draw(){
+drawField();
+players.forEach((p,i)=>{
+const isSel=i==selected;
+ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(p.x,p.y+10,11,5,0,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=p.team=='A'?'#facc15':'#dc2626';ctx.beginPath();ctx.arc(p.x,p.y,12,0,Math.PI*2);ctx.fill();
+ctx.fillStyle=p.team=='A'?'#1e40af':'#fff';ctx.fillRect(p.x-6,p.y-9,12,9);
+ctx.fillStyle='#000';ctx.font='bold 8px sans-serif';ctx.textAlign='center';ctx.fillText(p.num,p.x,p.y+3);
+if(isSel){ctx.strokeStyle='#fff';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(p.x,p.y,18,0,Math.PI*2);ctx.stroke();ctx.strokeStyle='#facc15';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x,p.y,22,0,Math.PI*2);ctx.stroke()}
+});
+ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,8,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#222';ctx.lineWidth=1;ctx.stroke();
+ctx.fillStyle='#000';ctx.beginPath();ctx.arc(ball.x-2,ball.y-1,2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(ball.x+2,ball.y+2,1.8,0,Math.PI*2);ctx.fill();
+requestAnimationFrame(draw);
+}
+draw();
+const joy=document.getElementById('joy'),stick=document.getElementById('stick');let dragging=false;
+joy.addEventListener('touchstart',e=>{dragging=true});joy.addEventListener('touchend',e=>{dragging=false;stick.style.transform='translate(-50%,-50%)';});
+joy.addEventListener('touchmove',e=>{
+if(!dragging)return;e.preventDefault();
+const r=joy.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;
+let dx=e.touches[0].clientX-cx,dy=e.touches[0].clientY-cy;const dist=Math.min(42,Math.hypot(dx,dy));const ang=Math.atan2(dy,dx);
+dx=Math.cos(ang)*dist;dy=Math.sin(ang)*dist;stick.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;
+players[selected].x+=Math.cos(ang)*dist*0.18;players[selected].y+=Math.sin(ang)*dist*0.18;
+players[selected].x=Math.max(15,Math.min(W-15,players[selected].x));players[selected].y=Math.max(90,Math.min(H-175,players[selected].y));
+let bdist=Math.hypot(ball.x-players[selected].x,ball.y-players[selected].y);if(bdist<30){ball.x+=Math.cos(ang)*dist*0.22;ball.y+=Math.sin(ang)*dist*0.22;}
+},{passive:false});
+canvas.addEventListener('touchstart',e=>{
+let closest=0,d=9999;players.forEach((p,i)=>{if(p.team!='A')return;const dist=Math.hypot(p.x-e.touches[0].clientX,p.y-e.touches[0].clientY);if(dist<d){d=dist;closest=i}});if(d<60)selected=closest;
+});
+document.getElementById('b2').addEventListener('touchstart',()=>{});
+document.getElementById('b3').addEventListener('touchstart',()=>{let target=players.filter(p=>p.team=='A'&&p!=players[selected]).sort((a,b)=>Math.hypot(a.x-ball.x,a.y-ball.y)-Math.hypot(b.x-ball.x,b.y-ball.y))[0];if(target){ball.vx=(target.x-ball.x)*0.12;ball.vy=(target.y-ball.y)*0.12;let it=setInterval(()=>{ball.x+=ball.vx;ball.y+=ball.vy;ball.vx*=0.98;ball.vy*=0.98;if(Math.hypot(ball.vx,ball.vy)<0.5)clearInterval(it);checkGoal()},16)}});
+document.getElementById('b4').addEventListener('touchstart',shoot);
+function shoot(){ball.vx=(W*0.9-ball.x)*0.08+(Math.random()-0.5)*3;ball.vy=(Math.random()-0.5)*6;let it=setInterval(()=>{ball.x+=ball.vx;ball.y+=ball.vy;ball.vy*=0.99;ball.vx*=0.995;checkGoal();if(ball.x<0||ball.x>W||ball.y<82||ball.y>H-165){ball.vx=0;ball.vy=0;clearInterval(it);}},16);}
+function checkGoal(){const goalY=(H-75)/2;if(ball.y>goalY-45&&ball.y<goalY+45){if(ball.x<=5){scoreB++;goalCelebrate()}if(ball.x>=W-5){scoreA++;goalCelebrate()}}}
+function goalCelebrate(){document.getElementById('goalPop').classList.add('show');document.getElementById('score').innerText=`BAN ${scoreA}-${scoreB} BRA`;if(navigator.vibrate)navigator.vibrate([100,50,200]);setTimeout(()=>{document.getElementById('goalPop').classList.remove('show');ball.x=W/2;ball.y=(H-75)/2;ball.vx=0;ball.vy=0;},1800);}
+setInterval(()=>{players.forEach((p,i)=>{if(p.team=='B'){let dx=ball.x-p.x,dy=ball.y-p.y;let d=Math.hypot(dx,dy);if(d<200){p.x+=dx*0.02;p.y+=dy*0.02;if(d<18){ball.x+=dx*0.1;ball.y+=dy*0.1;}}}})},30);
+</script>
+</body>
+</html>
