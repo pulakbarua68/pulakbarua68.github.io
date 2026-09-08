@@ -1,0 +1,142 @@
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BKF ULTRA - CARD SYSTEM 2026</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;touch-action:none;-webkit-tap-highlight-color:transparent}
+body{background:#000;height:100vh;overflow:hidden;font-family:Arial}
+#wrap{position:relative;width:100%;height:100vh;background:#0a1628;overflow:hidden}
+canvas{position:absolute;left:0;top:0;width:100%;height:100%}
+.pop{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%) scale(0);background:#facc15;color:#000;font-size:32px;font-weight:900;padding:10px 24px;border-radius:16px;z-index:99;transition:0.4s;text-align:center}
+.pop.show{transform:translate(-50%,-50%) scale(1)}
+#mainMenu{position:absolute;left:0;top:0;width:100%;height:100%;z-index:200;background:radial-gradient(circle at top,#1e3a8a,#000 80%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;transition:0.5s}
+#mainMenu.hide{transform:translateY(-100%);opacity:0;pointer-events:none}
+.logo{font-size:52px;font-weight:900;color:#facc15;text-shadow:0 0 20px #facc15;letter-spacing:2px}
+.sublogo{color:#fff;font-size:14px;letter-spacing:6px;font-weight:800;margin:6px 0 26px}
+.menuBtn{width:280px;padding:16px;background:linear-gradient(180deg,#facc15,#eab308);color:#000;font-weight:900;font-size:18px;border-radius:16px;border:3px solid #fff;margin:8px 0;text-align:center;box-shadow:0 6px 20px rgba(250,204,21,0.5);cursor:pointer}
+.menuBtn.sec{background:linear-gradient(180deg,#1e293b,#0f172a);color:#fff;border:2px solid rgba(255,255,255,0.3)}
+
+/* SQUAD SCREEN - LIKE YOUR PHOTO */
+#squadScreen{position:absolute;left:0;top:0;width:100%;height:100%;z-index:180;background:#0a0e1a;display:none;flex-direction:row}
+#squadScreen.show{display:flex}
+.squadLeft{width:88px;background:#060a14;display:flex;flex-direction:column;align-items:center;padding:14px 8px;gap:14px;border-right:2px solid #1e293b}
+.mgr{width:68px;height:68px;border-radius:16px;background:linear-gradient(180deg,#fff,#ddd);overflow:hidden;border:3px solid #fff;box-shadow:0 0 15px rgba(255,255,255,0.3)}
+.mgr img{width:100%;height:100%;object-fit:cover}
+.sideIcon{width:66px;height:66px;background:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 4px 12px rgba(0,0,0,0.5)}
+.backBtn{width:100%;background:#0ea5e9;color:#fff;padding:10px;border-radius:10px;text-align:center;font-weight:900;margin-top:auto;cursor:pointer}
+.squadCenter{flex:1;position:relative;background:radial-gradient(circle at center,#1a3a1a,#0a1a0a);overflow:hidden}
+.fieldLine{position:absolute;left:10%;right:10%;top:50%;height:2px;background:rgba(255,255,255,0.3)}
+.circleMid{position:absolute;left:50%;top:50%;width:110px;height:110px;border:2px solid rgba(255,255,255,0.25);border-radius:50%;transform:translate(-50%,-50%)}
+.pCard{position:absolute;width:68px;height:84px;background:linear-gradient(180deg,#1f2937,#000);border:2px solid #facc15;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:3px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.7);transition:0.2s}
+.pCard.selected{transform:scale(1.15);border-color:#00eaff;box-shadow:0 0 20px #00eaff;z-index:10}
+.pCard .pos{font-size:11px;font-weight:900;color:#4ade80}
+.pCard .rat{font-size:16px;font-weight:900;color:#fff;background:#000;border-radius:6px;padding:0 4px;margin-top:2px}
+.pCard .face{width:52px;height:42px;background:linear-gradient(180deg,#444,#222);border-radius:8px;margin-top:3px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:26px}
+.pCard .flag{font-size:10px;margin-top:2px}
+.squadRight{width:118px;background:linear-gradient(180deg,#0a0e1a,#060a14);padding:14px 8px;display:flex;flex-direction:column;gap:10px;border-left:2px solid #1e293b}
+.cs{color:#9ca3af;font-size:11px;text-align:right}
+.cs b{color:#facc15;font-size:28px;display:block;line-height:28px}
+.cs span{color:#fff;font-weight:900;font-size:13px;display:block}
+
+/* GAME HUD */
+.top{position:absolute;top:0;left:0;right:0;height:54px;background:#0e1f3f;display:flex;justify-content:space-between;align-items:center;padding:0 12px;z-index:20;border-bottom:3px solid #facc15}
+.ibtn{width:52px;height:38px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.hud{position:absolute;top:58px;left:8px;right:8px;background:rgba(0,0,0,0.88);border:1px solid #facc15;border-radius:12px;padding:8px 14px;display:flex;justify-content:space-between;color:#facc15;font-size:12px;font-weight:800;z-index:15}
+.btm{position:absolute;bottom:0;left:0;right:0;height:175px;background:linear-gradient(0deg,#000 65%,transparent);display:flex;justify-content:space-between;align-items:flex-end;padding:0 14px 12px;z-index:15}
+.joy{width:126px;height:126px;background:rgba(255,255,255,0.12);border:2px solid rgba(255,255,255,0.25);border-radius:50%;position:relative}
+.stick{position:absolute;left:50%;top:50%;width:56px;height:56px;background:#fff;border-radius:50%;transform:translate(-50%,-50%)}
+.grid{display:grid;grid-template-columns:74px 74px;gap:12px}
+.b{width:74px;height:74px;border-radius:50%;border:3px solid #fff;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:10px}
+.b b{font-size:22px}
+.b3{background:linear-gradient(180deg,#4ade80,#15803d)}.b4{background:linear-gradient(180deg,#fb923c,#c2410c)}
+
+/* UPDATE CHAT BUTTON */
+#updateBtn{position:absolute;right:14px;bottom:200px;z-index:250;background:linear-gradient(180deg,#00eaff,#0ea5e9);color:#000;font-weight:900;padding:12px 18px;border-radius:30px;border:3px solid #fff;box-shadow:0 6px 20px rgba(14,165,233,0.6);cursor:pointer;display:flex;gap:6px;align-items:center}
+#chatBox{position:absolute;right:10px;bottom:250px;width:300px;max-width:92%;background:#0f172a;border:2px solid #facc15;border-radius:18px;z-index:300;display:none;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.9)}
+#chatBox.show{display:flex}
+.chatHead{background:#facc15;color:#000;font-weight:900;padding:12px;text-align:center;display:flex;justify-content:space-between}
+.chatBody{padding:12px;max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.msg{background:#1e293b;color:#fff;padding:8px 12px;border-radius:12px;font-size:13px}
+.msg.me{background:#facc15;color:#000;align-self:flex-end}
+.chatInput{display:flex;gap:6px;padding:10px;background:#020617}
+.chatInput input{flex:1;padding:12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff}
+.chatInput button{background:#facc15;border:none;padding:0 16px;border-radius:12px;font-weight:900}
+.bench{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);border-top:2px solid #facc15;padding:10px;display:none;gap:8px;overflow-x:auto;z-index:20}
+.bench.show{display:flex}
+.bench .pCard{position:relative;flex-shrink:0}
+</style>
+</head>
+<body>
+<div id="wrap">
+<!-- MAIN MENU -->
+<div id="mainMenu">
+<div class="logo">BKF ULTRA</div>
+<div class="sublogo">eFOOTBALL 2026</div>
+<div class="menuBtn" id="btnSquad">🧩 MY SQUAD - PLAYER CARD</div>
+<div class="menuBtn" id="btnKick">▶️ KICK OFF</div>
+<div class="menuBtn sec" id="btnUpdateMenu">⚡ UPDATE SYSTEM</div>
+<div style="color:rgba(255,255,255,0.4);font-size:11px;margin-top:18px">pulakbarua68.github.io | v2.0 CARD EDITION</div>
+</div>
+
+<!-- SQUAD SCREEN LIKE YOUR IMAGE -->
+<div id="squadScreen">
+<div class="squadLeft">
+<div class="mgr">🧔</div>
+<div class="sideIcon">🇧🇩</div>
+<div class="sideIcon">👕</div>
+<div class="sideIcon">👕</div>
+<div class="backBtn" id="squadBack">◀ Back</div>
+</div>
+<div class="squadCenter" id="squadCenter">
+<div class="fieldLine"></div><div class="circleMid"></div>
+<!-- Cards will be injected by JS -->
+<div class="bench" id="bench"></div>
+</div>
+<div class="squadRight">
+<div class="cs">Collective<br>Strength <b id="csVal">3200</b></div>
+<div class="cs">Team Playstyle <span>Quick Count</span></div>
+<div class="cs">Formation <span id="formTxt">4-2-2-2</span></div>
+<div style="margin-top:20px;background:rgba(250,204,21,0.15);border:1px solid #facc15;border-radius:10px;padding:8px;color:#fff;font-size:11px">
+💡 Tap any card to SUBSTITUTE from bench
+</div>
+</div>
+</div>
+
+<!-- GAME VIEW -->
+<canvas id="c"></canvas>
+<div class="pop" id="goalPop">GOOOAL!!!</div>
+<div class="pop" id="throwPop" style="background:#fff;color:#e11d48;font-size:26px">THROW-IN</div>
+<div class="top" style="display:none" id="gameTop"><div class="ibtn" id="homeBtn">🏠</div><div class="ibtn">⏸️</div></div>
+<div class="hud" style="display:none" id="gameHud"><span id="sc">BAN 1-1 BRA</span><span style="color:#22c55e" id="ovrTxt">OVR 99 | CS 3200</span></div>
+<div class="btm" style="display:none" id="gameBtm">
+<div class="joy" id="joy"><div class="stick" id="stick"></div></div>
+<div class="grid"><div class="b b3" id="pass">PASS<b>↗️</b></div><div class="b b4" id="shoot">SHOOT<b>⚽</b></div></div>
+</div>
+
+<!-- UPDATE CHAT -->
+<div id="updateBtn">⚡ UPDATE</div>
+<div id="chatBox">
+<div class="chatHead"><span>⚡ UPDATE CHAT</span><span id="chatClose" style="cursor:pointer">✕</span></div>
+<div class="chatBody" id="chatBody">
+<div class="msg">👋 Hi! এখানে যা লিখবে তাই ৫ সেকেন্ডে গেমে Add করে দেবো। যেমন: "Add Messi", "Add rain effect" etc.</div>
+</div>
+<div class="chatInput"><input id="chatInput" placeholder="যা Add করতে চাও লিখো..."><button id="chatSend">ADD</button></div>
+</div>
+
+</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');let W,H;function R(){W=cv.width=innerWidth;H=cv.height=innerHeight}R();addEventListener('resize',R);
+let sA=1,sB=1,sel=0,gameStarted=false,paused=false;let ball={x:W/2,y:H/2,vx:0,vy:0};
+
+// SQUAD DATA LIKE YOUR IMAGE
+let squad=[
+ {id:0,pos:'CF',rat:105,name:'Drogba',flag:'🇧🇧',icon:'🦁',x:0.38,y:0.18},
+ {id:1,pos:'CF',rat:101,name:'Mbappe',flag:'🇫🇷',icon:'🐢',x:0.62,y
