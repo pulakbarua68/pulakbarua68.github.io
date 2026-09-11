@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"><title>BKF ULTRA 2027 GOD - DHRUBO</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}
+body{background:#050510;color:#fff;overflow:hidden}
+#intro{position:fixed;inset:0;z-index:9999;background:#0a0a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;background-size:cover;background-position:center;transition:1s}
+#intro::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,#050510 100%)}
+.bubble{position:absolute;border-radius:50%;filter:blur(1px);animation:float 6s infinite ease-in-out}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0deg) scale(1)}50%{transform:translateY(-40px) rotate(180deg) scale(1.2)}}
+.logo{position:relative;z-index:2;font-size:70px;font-weight:900;color:#0ff;text-shadow:0 0 20px #f0f;-webkit-text-stroke:2px #f0f;animation:spin3d 4s infinite linear;transform-style:preserve-3d}
+@keyframes spin3d{0%{transform:perspective(500px) rotateY(0deg)}100%{transform:perspective(500px) rotateY(360deg)}}
+#loader{position:relative;z-index:2;width:80%;max-width:400px;height:12px;background:#111;border-radius:20px;margin-top:20px;overflow:hidden;border:1px solid #0ff}
+#bar{width:0%;height:100%;background:linear-gradient(90deg,#0ff,#f0f);box-shadow:0 0 15px #0ff;transition:0.1s}
+.header{height:60px;background:linear-gradient(90deg,#ff0040,#7000ff);display:flex;align-items:center;justify-content:space-between;padding:0 15px;position:sticky;top:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px;height:calc(100vh - 60px);overflow:auto}
+.card{background:#1a1a2e;border:1px solid #333;border-radius:16px;padding:18px;text-align:center;cursor:pointer}
+.card:active{transform:scale(0.95)}
+.card.gold{border:2px solid gold;box-shadow:0 0 15px gold;display:none}
+#game{position:fixed;inset:0;background:#081d08;display:none;flex-direction:column;z-index:100}
+#field{flex:1;position:relative;overflow:hidden;background:radial-gradient(#1a5d1a,#0a3d0a)}
+#joystick{position:absolute;left:20px;bottom:20px;width:110px;height:110px;background:rgba(255,255,255,0.1);border-radius:50%;border:2px solid rgba(0,255,255,0.5)}
+#stick{position:absolute;width:50px;height:50px;background:#0ff;border-radius:50%;left:30px;top:30px;box-shadow:0 0 10px #0ff}
+.action{position:absolute;right:20px;bottom:20px;display:flex;flex-direction:column;gap:12px}
+.abtn{width:75px;height:75px;border-radius:50%;border:none;font-weight:900;color:white;font-size:12px}
+</style></head><body>
+<div id="intro">
+<div class="bubble" style="width:30px;height:30px;background:#0ff;left:10%;top:20%"></div>
+<div class="bubble" style="width:50px;height:50px;background:#f0f;left:80%;top:10%"></div>
+<div class="bubble" style="width:20px;height:20px;background:#0ff;left:30%;top:70%"></div>
+<div style="position:relative;z-index:2;text-align:center"><div class="logo">BKF</div><div style="font-size:28px;font-weight:800;letter-spacing:4px">ULTRA<br><span style="border-top:2px solid #fff;border-bottom:2px solid #fff;padding:2px 15px">2027</span><br><small style="font-size:12px;color:gold">DHRUBO EDITION</small></div></div>
+<div style="position:relative;z-index:2;margin-top:80px;width:80%;text-align:center"><div style="display:flex;justify-content:space-between;font-size:13px;color:#0ff"><span>Download Completed</span><span id="pct">0%</span></div><div id="loader"><div id="bar"></div></div></div>
+</div>
+<div class="header"><b>BKF ULTRA 2027 - DHRUBO</b><span id="bid" style="font-size:10px;background:gold;color:black;padding:5px 10px;border-radius:20px"></span></div>
+<div class="grid" id="mainGrid">
+<div class="card" onclick="openGame('quick')">⚡ QUICK MATCH<br><small>360° + Sprint/Pass/Shoot</small></div>
+<div class="card" onclick="openGame('friendly')">🤝 FRIENDLY<br><small>BKF ID DHRUBO</small></div>
+<div class="card" onclick="openGame('tournament')">🏆 TOURNAMENT<br><small>FIFA WC 2002-2026</small></div>
+<div class="card" onclick="openGame('club')">🏆 CLUB TOURNAMENT</div>
+<div class="card" onclick="openGame('cards')">🃏 PLAYER CARD<br><small>LB 120 MESSI</small></div>
+<div class="card" onclick="openGame('stadium')">🏟️ STADIUM BUILDER</div>
+<div class="card" id="godCard" onclick="openGame('god')">🔴 GOD ULTRA UPDATE<br><small>Only DHRUBO Phone</small></div>
+</div>
+<div id="game">
+<div style="height:50px;background:#111;display:flex;align-items:center;justify-content:space-between;padding:0 15px"><span id="gTitle"></span><button onclick="document.getElementById('game').style.display='none'" style="padding:8px 15px;border-radius:8px;border:none;background:#333;color:white">BACK</button></div>
+<div id="field"><div style="position:absolute;left:50%;top:50%;width:80px;height:80px;background:white;border-radius:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;font-size:40px" id="ball">⚽</div><div id="joystick"><div id="stick"></div></div><div class="action"><button class="abtn" style="background:#0f0" id="sprintBtn">SPRINT</button><button class="abtn" style="background:#08f">PASS</button><button class="abtn" style="background:#f00">SHOOT</button></div></div>
+<div id="gBody" style="padding:15px;background:#0a0a1a;display:none"></div>
+</div>
+<script>
+var id=localStorage.getItem("bkf_id")||"BKF-DHRUBO-"+Math.floor(Math.random()*9000);
+localStorage.setItem("bkf_id",id);
+document.getElementById("bid").innerText=id;
+if(id.includes("DHRUBO")||localStorage.getItem("isOwner")=="true"){document.getElementById("godCard").style.display="block";}else{var c=prompt("GOD CODE (777)");if(c=="777"){localStorage.setItem("isOwner","true");document.getElementById("godCard").style.display="block";}}
+var p=0,bar=document.getElementById("bar"),pct=document.getElementById("pct");
+var load=setInterval(function(){p+=2;bar.style.width=p+"%";pct.innerText=p+"%";if(p>=100){clearInterval(load);setTimeout(function(){document.getElementById("intro").style.opacity="0";setTimeout(function(){document.getElementById("intro").style.display="none"},1000)},500)}},30);
+var savedList=JSON.parse(localStorage.getItem("bkf_god_list")||"[]");
+for(var i=0;i<savedList.length;i++){var cc=document.createElement("div");cc.className="card";cc.style.border="2px solid #0f0";cc.innerHTML="✅ "+savedList[i];document.getElementById("mainGrid").appendChild(cc);}
+function openGame(t){
+var g=document.getElementById("game");g.style.display="flex";document.getElementById("gTitle").innerText=t.toUpperCase()+" 100%";
+if(t=="god"){document.getElementById("field").style.display="none";var b=document.getElementById("gBody");b.style.display="block";var h="";for(var k=0;k<savedList.length;k++){h+="<div style='background:#111;padding:8px;margin:4px;border-radius:6px;border-left:3px solid #0f0'>✅ "+savedList[k]+"</div>";}b.innerHTML="<textarea id='godIn' style='width:100%;height:80px;background:#000;color:#0f0;border:1px solid red;border-radius:8px;padding:10px' placeholder='+ type your new friend'></textarea><br><br><button id='addBtn' style='width:100%;padding:15px;background:red;color:white;border:none;border-radius:10px'>🚀 100% ADD - DHRUBO ONLY</button><div style='margin-top:15px'>"+h+"</div>";document.getElementById("addBtn").onclick=function(){var txt=document.getElementById("godIn").value;if(!txt)return;savedList.push(txt);localStorage.setItem("bkf_god_list",JSON.stringify(savedList));alert("✅ ADDED DHRUBO");location.reload();};}
+else{document.getElementById("field").style.display="block";document.getElementById("gBody").style.display="none";}
+}
+</script>
+</body></html>
